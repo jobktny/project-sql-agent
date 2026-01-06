@@ -14,9 +14,11 @@ license = {text = "MIT"}
 [dependency-groups]
 dev = [
     "ruff>=0.14.10",
-    "fastapi>=0.126.0",
+    "fastapi[standard]>=0.127.1",
     "sqlalchemy>=2.0.45",
     "psycopg2-binary>=2.9.11",
+    "dash>=3.3.0",
+    "dash-ag-grid>=32.3.4",
 ]
 
 [tool.ruff]
