@@ -1,0 +1,8 @@
+{
+    "graphs": {
+        "sql_agent": "./services/backend_api/app/chat_services/graph_server.py:graph"
+    },
+    "dependencies": [
+        "."
+    ]
+}
