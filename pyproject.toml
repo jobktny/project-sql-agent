@@ -6,7 +6,7 @@ authors = [
     {name = "Kittinun Yenyueak", email = "kittinun.ye@gmail.com"},
 ]
 dependencies = ["langchain-community>=0.4.1", "langchain-openai>=1.1.6", "langchainhub>=0.1.21", "langchain>=1.2.0", "openai>=2.14.0", "pandas>=2.3.3", "langid>=1.1.6", "langchain-google-genai>=4.1.2", "langgraph>=1.0.5", "langsmith>=0.5.0", "fastapi>=0.126.0", "langchain-groq>=1.1.1"]
-requires-python = "==3.12.*"
+requires-python = "==3.13.*"
 readme = "README.md"
 license = {text = "MIT"}
 
@@ -14,11 +14,12 @@ license = {text = "MIT"}
 [dependency-groups]
 dev = [
     "ruff>=0.14.10",
-    "fastapi[standard]>=0.127.1",
+    "fastapi[standard]>=0.128.0",
     "sqlalchemy>=2.0.45",
     "psycopg2-binary>=2.9.11",
     "dash>=3.3.0",
     "dash-ag-grid>=32.3.4",
+    "langgraph-cli[inmem]>=0.4.11",
 ]
 
 [tool.ruff]

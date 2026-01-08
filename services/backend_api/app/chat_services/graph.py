@@ -40,7 +40,7 @@ class GraphBuilder:
 
         self.workflow = self.workflow.compile()
 
-    def get_graph(self) -> StateGraph:
+    def build_graph(self) -> StateGraph:
         return self.workflow
 
     def chat_router(self, state: State):
