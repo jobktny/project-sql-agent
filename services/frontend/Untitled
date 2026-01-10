@@ -1,0 +1,32 @@
+(sql_chatbot) ➜  project-sql-agent git:(feat/add-agent-api) git push --force-with-lease origin feat/add-agent-api
+Enumerating objects: 23492, done.
+Counting objects: 100% (23492/23492), done.
+Delta compression using up to 8 threads
+Compressing objects: 100% (14732/14732), done.
+Writing objects: 100% (23483/23483), 177.70 MiB | 760.00 KiB/s, done.
+Total 23483 (delta 6334), reused 23407 (delta 6292), pack-reused 0 (from 0)
+remote: Resolving deltas: 100% (6334/6334), completed with 5 local objects.
+remote: error: Trace: e7bc0588d350b5d274834dcae3cfe826216df4ae56288e21ae13427e6600265b
+remote: error: See https://gh.io/lfs for more information.
+remote: error: File services/frontend/node_modules/.pnpm/@next+swc-darwin-arm64@15.4.8/node_modules/@next/swc-darwin-arm64/next-swc.darwin-arm64.node is 123.61 MB; this exceeds GitHub's file size limit of 100.00 MB
+remote: error: GH001: Large files detected. You may want to try Git Large File Storage - https://git-lfs.github.com.
+To https://github.com/jobktny/project-sql-agent.git
+ ! [remote rejected]   feat/add-agent-api -> feat/add-agent-api (pre-receive hook declined)
+error: failed to push some refs to 'https://github.com/jobktny/project-sql-agent.git'
+(sql_chatbot) ➜  project-sql-agent git:(feat/add-agent-api) # Verify node_modules is no longer tracked
+git ls-files | grep node_modules
+
+# Should return nothing. If it does, continue cleanup:
+git gc --prune=now --aggressive
+Enumerating objects: 23549, done.
+Counting objects: 100% (23549/23549), done.
+Delta compression using up to 8 threads
+Compressing objects: 100% (21087/21087), done.
+Writing objects: 100% (23549/23549), done.
+Total 23549 (delta 8345), reused 15162 (delta 0), pack-reused 0 (from 0)
+(sql_chatbot) ➜  project-sql-agent git:(feat/add-agent-api) git push --force-with-lease origin feat/add-agent-api
+Enumerating objects: 23492, done.
+Counting objects: 100% (23492/23492), done.
+Delta compression using up to 8 threads
+Compressing objects: 100% (12717/12717), done.
+Writing objects:   0% (52/23483), 18.19 MiB | 923.00 KiB/s 

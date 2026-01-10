@@ -1,11 +1,12 @@
 from contextlib import asynccontextmanager
 
-from app.chat_services.chat import ChatService
-from app.config import Config
-from app.models.chat_models import ChatRequest, ChatResponse
 from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import create_engine, text
+
+from app.chat_services.chat import ChatService
+from app.config import Config
+from app.models.chat_models import ChatRequest, ChatResponse
 
 # database
 config = Config()
@@ -42,7 +43,7 @@ app.add_middleware(
 async def agent_chat(
     request: ChatRequest, chat_service: ChatService = Depends(ChatService)
 ):
-    result = chat_service.chat_flow(request.message)
+    result = chat_service.chat_flow(request.message, request.history)
     return ChatResponse(message=result["agent_answer"])
 
 

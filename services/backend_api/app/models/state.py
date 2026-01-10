@@ -1,12 +1,12 @@
-from typing import Annotated, Literal
+from typing import Literal
 
 from langchain_core.messages import AIMessage, HumanMessage
-from langgraph.graph.message import add_messages
 from pydantic import BaseModel
 
 
 class State(BaseModel):
-    messages: Annotated[list, add_messages] = []
+    # messages: Annotated[list, add_messages] = []
+    message: str = ""
 
     # selected_agent: Optional[str] = None
     history: list[HumanMessage | AIMessage] = []
