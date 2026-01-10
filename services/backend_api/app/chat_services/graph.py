@@ -38,10 +38,8 @@ class GraphBuilder:
         self.workflow.add_edge("generate_answer", END)
         self.workflow.add_edge("cannot_answer", END)
 
-        self.workflow = self.workflow.compile()
-
     def build_graph(self) -> StateGraph:
-        return self.workflow
+        return self.workflow.compile()
 
     def chat_router(self, state: State):
         if state.chit_chat:

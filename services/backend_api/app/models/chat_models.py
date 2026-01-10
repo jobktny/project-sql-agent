@@ -3,8 +3,15 @@ from typing import Annotated
 from pydantic import BaseModel, Field
 
 
+class History(BaseModel):
+    query: str
+    response: str
+
+
 class ChatRequest(BaseModel):
+    history: list[History] = []
     message: str
+    user_id: str
 
 
 class ChatResponse(BaseModel):

@@ -5,6 +5,7 @@ import "./markdown-styles.css";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeKatex from "rehype-katex";
+import rehypeRaw from "rehype-raw";
 import remarkMath from "remark-math";
 import { FC, memo, useState } from "react";
 import { CheckIcon, CopyIcon } from "lucide-react";
@@ -193,6 +194,14 @@ const defaultComponents: any = {
       {...props}
     />
   ),
+  img: ({ src, alt, className, ...props }: { src?: string; alt?: string; className?: string }) => (
+    <img
+      src={src}
+      alt={alt || ""}
+      className={cn("my-4 max-w-full rounded-lg shadow-md", className)}
+      {...props}
+    />
+  ),
   pre: ({ className, ...props }: { className?: string }) => (
     <pre
       className={cn(
@@ -244,11 +253,51 @@ const defaultComponents: any = {
 };
 
 const MarkdownTextImpl: FC<{ children: string }> = ({ children }) => {
+  // Check if content contains a base64 image and render it separately
+  const base64ImageMatch = children.match(
+    /<img\s+src="(data:image\/[^"]+)"[^>]*\/?>/
+  );
+
+  if (base64ImageMatch) {
+    // Split content around the image tag
+    const parts = children.split(base64ImageMatch[0]);
+    const beforeImage = parts[0] || "";
+    const afterImage = parts[1] || "";
+
+    return (
+      <div className="markdown-content">
+        {beforeImage && (
+          <ReactMarkdown
+            remarkPlugins={[remarkGfm, remarkMath]}
+            rehypePlugins={[rehypeRaw, rehypeKatex]}
+            components={defaultComponents}
+          >
+            {beforeImage}
+          </ReactMarkdown>
+        )}
+        <img
+          src={base64ImageMatch[1]}
+          alt="Chart"
+          className="my-4 max-w-full rounded-lg shadow-md"
+        />
+        {afterImage && (
+          <ReactMarkdown
+            remarkPlugins={[remarkGfm, remarkMath]}
+            rehypePlugins={[rehypeRaw, rehypeKatex]}
+            components={defaultComponents}
+          >
+            {afterImage}
+          </ReactMarkdown>
+        )}
+      </div>
+    );
+  }
+
   return (
     <div className="markdown-content">
       <ReactMarkdown
         remarkPlugins={[remarkGfm, remarkMath]}
-        rehypePlugins={[rehypeKatex]}
+        rehypePlugins={[rehypeRaw, rehypeKatex]}
         components={defaultComponents}
       >
         {children}
