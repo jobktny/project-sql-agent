@@ -1,12 +1,11 @@
 from contextlib import asynccontextmanager
 
-from fastapi import Depends, FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy import create_engine, text
-
 from app.chat_services.chat import ChatService
 from app.config import Config
 from app.models.chat_models import ChatRequest, ChatResponse
+from fastapi import Depends, FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy import create_engine, text
 
 # database
 config = Config()
