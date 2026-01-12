@@ -197,7 +197,7 @@ const defaultComponents: any = {
   ),
   pre: ({ children, ...props }: { children: React.ReactNode; className?: string }) => {
     // Check if child is a Python code block - if so, don't wrap in pre
-    const child = React.Children.toArray(children)[0] as React.ReactElement;
+    const child = React.Children.toArray(children)[0] as React.ReactElement<{ children?: React.ReactNode; className?: string }>;
     if (child?.props?.className?.includes('language-python') ||
       child?.props?.className?.includes('language-py')) {
       // Return just the RunnableCode without pre wrapper
