@@ -54,15 +54,21 @@ class Agent:
     def write_query(self, state: State):
         user_message = state.messages[-1].content  # langgraph approach
         system_message = """
-        You are a SQL query agent. You are given a user's message and you need to create a syntactically correct {dialect} query to run to help find the answer.
-        You will also need to determine if the user wants to visualise the data. If so, you will need to set the need_visualise flag to True.
-        Never query for all the columns from a specific table, only ask for a few relevant columns given the question.
-        Pay attention to use only the column names that you can see in the schema description.
-        Be careful to not query for columns that do not exist. Also, pay attention to which column is in which table.
-        Only use the following tables:
-        {table_info}
-        If the user's message is not about the data in the database, you should set the out_of_policy flag to True.
-        If the user's message is a chit chat, you should set the chit_chat flag to True.
+            You are a SQL router agent. You are given a user message and you will need to determine what is the most intention of the user.
+
+            You will need to do the following tasks:
+            1. You need to create a syntactically correct {dialect} query to run to help find the answer.
+            2. You will need to determine if the user need to visualise the data or not (eg. vistualise..., show me the barchart... etc.) If so, you will need to set the need_visualise flag to True.
+            3. Never query for all the columns from a specific table, only ask for a few relevant columns given the question.
+            4. Pay attention to use only the column names that you can see in the schema description.
+            5. Be careful to not query for columns that do not exist. Also, pay attention to which column is in which table.
+
+            Only use the following tables:
+            {table_info}
+
+            Out of policy handling:
+            If the user's message is greeting, farewell, or anything that is not about the data in the database, or not sure about the intention of the user you should set the chit_chat flag to True.
+            If the user's message is far from the data in the database, you should set the out_of_policy flag to True.
         """
         user_prompt = """
         Question: {input}
@@ -189,16 +195,17 @@ class Agent:
 
     def generate_answer(self, state: State):
         user_message = state.messages[-1].content  # langgraph approach
-        system_prompt = (
-            "/no_think\n"
-            "You are a business assistant responding to a manager's queriesthe Question. in short sentence\n"
-            "Given the manager's question and the result of the internal SQL query used to retrieve the relevant data, answer the question clearly and professionally.\n"
-            "Use a well-formatted table with clear headers **only if** the question requires structured data, such as a list of transactions, balances over time, or multiple entries.\n"
-            "Otherwise, respond in plain text that reads naturally.\n"
-            "Do not mention SQL queries, databases, or how the data was retrieved.\n"
-            "Avoid phrases like 'Hello there!', 'I'm happy to help...', or anything overly formal or robotic.\n"
-            "Give a direct, informative, human-like answer as if responding to a manager's internal query.\n"
-        )
+        system_prompt = """
+            /no_think\n
+            You are a business assistant. You are given a user message about business data and you need to answer the question.
+            You will keep in mind to keep the professional tone and answer the question clearly and professionally. Analytically answer the question.
+
+            You will need to do the following tasks:
+            1. Use a well-formatted table with clear headers **only if** the question requires structured data, such as a list of transactions, balances over time, or multiple entries. Otherwise, respond in plain text that reads naturally.
+            2. Do not mention SQL queries, databases, or how the data was retrieved.
+            3. Avoid phrases like 'Hello there!', 'I'm happy to help...', or anything overly formal or robotic.
+            4. Give a direct, informative, human-like answer as if responding to a manager's internal query.
+        """
         user_prompt = "Manager's Question: {user_message}\nResult: {sql_result}"
         prompt_template = ChatPromptTemplate(
             [("system", system_prompt), ("user", user_prompt)]
@@ -226,13 +233,18 @@ class Agent:
     def plot_agent(self, state: State):
         user_message = state.messages[-1].content  # langgraph approach
         system_message = """
-        /no_think
-        You are a data visualization expert and use your favourite graphing library Plotly only. Suppose, that
-        the data is provided as {sql_result}. Follow the user's indications when creating the graph.
+            /no_think
+            You are a data visualization expert and use your favourite graphing library Plotly only.
+            The full database schema is as follows: \n{table_info}\n
+            The data to be visualised is provided as \n{sql_result}.\n
 
-        IMPORTANT: When creating Plotly figures, ensure you do NOT repeat any keyword arguments. 
-        Each parameter (like xaxis, yaxis, title, etc.) should only appear once in any function call.
-        Generate clean, syntactically correct Python code without duplicate arguments.
+            You will need to do the following tasks:
+            1. Follow the user's indications when creating the graph.
+            2. Analytically answer the question. (eg. point out potential insights, trends, annomalies, etc.)
+            3. Ensure you do NOT repeat any keyword arguments. 
+            4. Each parameter (like xaxis, yaxis, title, etc.) should only appear once in any function call.
+            5. Generate clean, syntactically correct Python code without duplicate arguments.
+            6. IMPORTANT: Always include ALL necessary imports at the top of your code (e.g., `import datetime`, `from datetime import datetime`, `import pandas as pd`, etc.). Never assume any module is pre-imported.
         """
         user_prompt = """
             User message: {user_message}
@@ -244,6 +256,7 @@ class Agent:
         formatted_prompt = plot_agent_prompt_template.invoke(
             {
                 "sql_result": state.sql_result,
+                "table_info": self.db.get_table_info(),
                 "user_message": user_message,
             }
         )

@@ -14,7 +14,7 @@ import { TooltipIconButton } from "@/components/thread/tooltip-icon-button";
 import { cn } from "@/lib/utils";
 
 import "katex/dist/katex.min.css";
-import { RunnableCode } from "./run-code";
+import { RunnableCode } from "@/components/thread/runnable-code";
 
 
 interface CodeHeaderProps {
