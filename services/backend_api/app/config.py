@@ -4,8 +4,8 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# GROQ_MODEL = "openai/gpt-oss-120b"  # 200k tokens per day
-GROQ_MODEL = "qwen/qwen3-32b"  # 500k tokens per day
+GROQ_MODEL = "openai/gpt-oss-120b"  # 200k tokens per day
+# GROQ_MODEL = "qwen/qwen3-32b"  # 500k tokens per day
 # GROQ_MODEL = "llama-3.3-70b-versatile"  # 100k tokens per day
 # GROQ_MODEL = "moonshotai/kimi-k2-instruct"  # 300k tokens per day
 
