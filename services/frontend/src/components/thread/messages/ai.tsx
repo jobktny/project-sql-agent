@@ -81,7 +81,7 @@ function Interrupt({
   const fallbackValue = Array.isArray(interrupt)
     ? (interrupt as Record<string, any>[])
     : (((interrupt as { value?: unknown } | undefined)?.value ??
-      interrupt) as Record<string, any>);
+        interrupt) as Record<string, any>);
 
   return (
     <>
@@ -90,8 +90,8 @@ function Interrupt({
           <ThreadView interrupt={interrupt} />
         )}
       {interrupt &&
-        !isAgentInboxInterruptSchema(interrupt) &&
-        (isLastMessage || hasNoAIOrToolMessages) ? (
+      !isAgentInboxInterruptSchema(interrupt) &&
+      (isLastMessage || hasNoAIOrToolMessages) ? (
         <GenericInterruptView interrupt={fallbackValue} />
       ) : null}
     </>

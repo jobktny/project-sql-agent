@@ -1,11 +1,9 @@
-import base64
-import re
-
 from app.config import GROQ_MODEL, Config
 from app.models.chat_models import QueryOutput
 from app.models.state import State
 from langchain_community.tools.sql_database.tool import QuerySQLDatabaseTool
 from langchain_community.utilities.sql_database import SQLDatabase
+from langchain_core.messages import AIMessage
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_groq import ChatGroq
 from sqlalchemy import create_engine
@@ -20,6 +18,7 @@ class Agent:
         self.db = SQLDatabase(engine)
 
     def chat_agent(self, state: State):
+        user_message = state.messages[-1].content  # langgraph approach
         system_message = """
         /no_think
         You are a simple chat agent. You are given a user's message and you need to answer the question. and handle the simple message like greeting, farewell, etc.
@@ -37,20 +36,23 @@ class Agent:
         formatted_prompt = general_agent_prompt_template.invoke(
             {
                 "table_info": self.db.get_table_info(),
-                "user_message": state.message,
+                "user_message": user_message,
             }
         )
 
-        prompt = state.history + formatted_prompt.messages
+        # prompt = state.history + formatted_prompt.messages # fastapi approach
+        prompt = list(state.messages) + formatted_prompt.messages
 
         llm = ChatGroq(model=GROQ_MODEL, groq_api_key=Config.groq_api_key)
         response = llm.invoke(prompt)
 
         return {
-            "agent_answer": response.content,
+            # "agent_answer": response.content, # fastapi approach
+            "messages": [AIMessage(content=response.content)],
         }
 
     def write_query(self, state: State):
+        user_message = state.messages[-1].content  # langgraph approach
         system_message = """
         You are a SQL query agent. You are given a user's message and you need to create a syntactically correct {dialect} query to run to help find the answer.
         You will also need to determine if the user wants to visualise the data. If so, you will need to set the need_visualise flag to True.
@@ -74,12 +76,15 @@ class Agent:
                 {
                     "dialect": self.db.dialect,
                     "table_info": self.db.get_table_info(),
-                    "input": state.message,
+                    "input": user_message,
                     "query_error": state.sql_query_error or "None",
                 }
             )
 
-            prompt = state.history + formatted_prompt.messages
+            prompt = (
+                list(state.messages) + formatted_prompt.messages
+            )  # langgraph approach
+            # prompt = state.history + formatted_prompt.messages # fastapi approach
 
             llm = ChatGroq(model=GROQ_MODEL, groq_api_key=Config.groq_api_key)
             structured_llm = llm.with_structured_output(QueryOutput)
@@ -174,10 +179,16 @@ class Agent:
     def cannot_answer(self, state: State):
         return {
             "sql_error_count": 0,
-            "agent_answer": "I'm sorry, but I cannot find the information you're looking for.",
+            # "agent_answer": "I'm sorry, but I cannot find the information you're looking for.", # fastapi approach
+            "messages": [
+                AIMessage(
+                    content="I'm sorry, but I cannot find the information you're looking for."
+                )
+            ],
         }
 
     def generate_answer(self, state: State):
+        user_message = state.messages[-1].content  # langgraph approach
         system_prompt = (
             "/no_think\n"
             "You are a business assistant responding to a manager's queriesthe Question. in short sentence\n"
@@ -194,29 +205,34 @@ class Agent:
         )
         formatted_prompt = prompt_template.invoke(
             {
-                "user_message": state.message,
+                "user_message": user_message,
                 "sql_result": state.sql_result,
             }
         )
         # Prepend history to the formatted messages
-        messages = state.history + formatted_prompt.messages
+        messages = (
+            list(state.messages) + formatted_prompt.messages
+        )  # langgraph approach
+        # messages = state.history + formatted_prompt.messages # fastapi approach
 
         llm = ChatGroq(model=GROQ_MODEL, groq_api_key=Config.groq_api_key)
         response = llm.invoke(messages)
 
         return {
-            "agent_answer": response.content,
+            # "agent_answer": response.content, # fastapi approach
+            "messages": [AIMessage(content=response.content)],
         }
 
     def plot_agent(self, state: State):
+        user_message = state.messages[-1].content  # langgraph approach
         system_message = """
-            You are a data visualization expert using Plotly. Generate Python code to create a chart.
-            The data is: {sql_result}
-            
-            IMPORTANT:
-            - Create a variable called `fig` with the Plotly figure
-            - Do NOT call fig.show()
-            - Use plotly.express (as px) or plotly.graph_objects (as go)
+        /no_think
+        You are a data visualization expert and use your favourite graphing library Plotly only. Suppose, that
+        the data is provided as {sql_result}. Follow the user's indications when creating the graph.
+
+        IMPORTANT: When creating Plotly figures, ensure you do NOT repeat any keyword arguments. 
+        Each parameter (like xaxis, yaxis, title, etc.) should only appear once in any function call.
+        Generate clean, syntactically correct Python code without duplicate arguments.
         """
         user_prompt = """
             User message: {user_message}
@@ -228,46 +244,18 @@ class Agent:
         formatted_prompt = plot_agent_prompt_template.invoke(
             {
                 "sql_result": state.sql_result,
-                "user_message": state.message,
+                "user_message": user_message,
             }
         )
 
-        prompt = state.history + formatted_prompt.messages
+        prompt = list(state.messages) + formatted_prompt.messages  # langgraph approach
+        # prompt = state.history + formatted_prompt.messages # fastapi approach
 
         llm = ChatGroq(model=GROQ_MODEL, groq_api_key=Config.groq_api_key)
         response = llm.invoke(prompt)
         result_output = response.content
 
-        # Extract code block from response
-        code_block_match = re.search(r"```(?:python)?(.*)```", result_output, re.DOTALL)
-
-        if code_block_match:
-            code_block = code_block_match.group(1).strip()
-            # Remove fig.show() calls
-            cleaned_code = re.sub(r"(?m)^\s*fig\.show\(\)\s*$", "", code_block)
-
-            try:
-                fig = self._get_fig_from_code(cleaned_code)
-                if fig is not None:
-                    # Convert figure to base64 PNG image
-                    img_bytes = fig.to_image(format="png", width=800, height=500)
-                    img_base64 = base64.b64encode(img_bytes).decode("utf-8")
-
-                    # Return as HTML image (works better with long base64 strings)
-                    content = f'Here\'s the visualization:\n\n<img src="data:image/png;base64,{img_base64}" alt="Chart" style="max-width: 100%; border-radius: 8px;" />'
-                    return {"agent_answer": content}
-            except Exception as e:
-                error_msg = f"Generated code but couldn't render: {e}\n\n```python\n{cleaned_code}\n```"
-                return {"agent_answer": error_msg}
-
-        # Fallback: return the raw response
-        return {"agent_answer": result_output}
-
-    def _get_fig_from_code(self, code: str):
-        """Execute Plotly code and return the figure."""
-        import plotly.express as px
-        import plotly.graph_objects as go
-
-        local_vars = {"px": px, "go": go}
-        exec(code, {"__builtins__": __builtins__}, local_vars)
-        return local_vars.get("fig")
+        return {
+            # "agent_answer": result_output, # fastapi approach
+            "messages": [AIMessage(content=result_output)],
+        }
