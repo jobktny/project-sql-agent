@@ -6,7 +6,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeKatex from "rehype-katex";
 import remarkMath from "remark-math";
-import { FC, memo, useState } from "react";
+import React, { FC, memo, useState } from "react";
 import { CheckIcon, CopyIcon } from "lucide-react";
 import { SyntaxHighlighter } from "@/components/thread/syntax-highlighter";
 
@@ -14,6 +14,8 @@ import { TooltipIconButton } from "@/components/thread/tooltip-icon-button";
 import { cn } from "@/lib/utils";
 
 import "katex/dist/katex.min.css";
+import { RunnableCode } from "./runnable-code";
+
 
 interface CodeHeaderProps {
   language?: string;
@@ -193,15 +195,30 @@ const defaultComponents: any = {
       {...props}
     />
   ),
-  pre: ({ className, ...props }: { className?: string }) => (
-    <pre
-      className={cn(
-        "max-w-4xl overflow-x-auto rounded-lg bg-black text-white",
-        className,
-      )}
-      {...props}
-    />
-  ),
+  pre: ({ children, ...props }: { children: React.ReactNode; className?: string }) => {
+    // Check if child is a Python code block - if so, don't wrap in pre
+    const child = React.Children.toArray(children)[0] as React.ReactElement;
+    if (child?.props?.className?.includes('language-python') ||
+      child?.props?.className?.includes('language-py')) {
+      // Return just the RunnableCode without pre wrapper
+      const code = String(child.props.children).replace(/\n$/, "");
+      return <RunnableCode code={code} language="python" autoRun={true} />;
+    }
+
+    return (
+      <pre
+        className={cn(
+          "max-w-4xl overflow-x-auto rounded-lg bg-black text-white",
+          props.className,
+        )}
+        {...props}
+      >
+        {children}
+      </pre>
+    );
+  },
+
+  // CHANGE: code component - only handle inline code and non-Python blocks
   code: ({
     className,
     children,
@@ -216,16 +233,15 @@ const defaultComponents: any = {
       const language = match[1];
       const code = String(children).replace(/\n$/, "");
 
+      // Python is handled by pre component now
+      if (language === "python" || language === "py") {
+        return <>{children}</>;  // Let pre handle it
+      }
+
       return (
         <>
-          <CodeHeader
-            language={language}
-            code={code}
-          />
-          <SyntaxHighlighter
-            language={language}
-            className={className}
-          >
+          <CodeHeader language={language} code={code} />
+          <SyntaxHighlighter language={language} className={className}>
             {code}
           </SyntaxHighlighter>
         </>
@@ -233,10 +249,7 @@ const defaultComponents: any = {
     }
 
     return (
-      <code
-        className={cn("rounded font-semibold", className)}
-        {...props}
-      >
+      <code className={cn("rounded font-semibold", className)} {...props}>
         {children}
       </code>
     );
@@ -244,6 +257,9 @@ const defaultComponents: any = {
 };
 
 const MarkdownTextImpl: FC<{ children: string }> = ({ children }) => {
+  // Strip <think>...</think> tags from the content
+  const cleanedContent = children.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
+
   return (
     <div className="markdown-content">
       <ReactMarkdown
@@ -251,10 +267,11 @@ const MarkdownTextImpl: FC<{ children: string }> = ({ children }) => {
         rehypePlugins={[rehypeKatex]}
         components={defaultComponents}
       >
-        {children}
+        {cleanedContent}
       </ReactMarkdown>
     </div>
   );
 };
 
 export const MarkdownText = memo(MarkdownTextImpl);
+

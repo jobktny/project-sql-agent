@@ -43,7 +43,7 @@ app.add_middleware(
 async def agent_chat(
     request: ChatRequest, chat_service: ChatService = Depends(ChatService)
 ):
-    result = chat_service.chat_flow(request.message)
+    result = chat_service.chat_flow(request.message, request.history)
     return ChatResponse(message=result["agent_answer"])
 
 

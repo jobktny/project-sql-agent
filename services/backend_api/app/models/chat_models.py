@@ -1,10 +1,19 @@
-from typing import Annotated
+from typing import Annotated, Literal
 
 from pydantic import BaseModel, Field
 
 
-class ChatRequest(BaseModel):
+class History(BaseModel):
+    actor: Annotated[
+        Literal["user", "agent"], Field(description="The actor of the message.")
+    ]
     message: str
+
+
+class ChatRequest(BaseModel):
+    history: list[History] = []
+    message: str
+    # user_id: str
 
 
 class ChatResponse(BaseModel):
