@@ -17,22 +17,6 @@ def identify_primary_key(df):
     return None
 
 
-# def validate_foreign_key_data(engine, child_table, child_col, parent_table, parent_col):
-#     with engine.connect() as conn:
-#         # Get all distinct values in child table's FK column
-#         query = f"SELECT DISTINCT {child_col} FROM {child_table} WHERE {child_col} IS NOT NULL"
-#         child_values = pd.read_sql(query, conn)[child_col].tolist()
-
-#         # Get all values in parent table's PK column
-#         query = f"SELECT {parent_col} FROM {parent_table}"
-#         parent_values = pd.read_sql(query, conn)[parent_col].tolist()
-
-#         # Find missing values
-#         missing_values = [val for val in child_values if val not in parent_values]
-
-#         return missing_values
-
-
 def setup_primary_keys(engine, pk_map):
     with engine.connect() as conn:
         for table_name, pk_column in pk_map.items():

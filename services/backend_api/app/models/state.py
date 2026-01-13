@@ -7,9 +7,9 @@ from pydantic import BaseModel
 
 class State(BaseModel):
     messages: Annotated[list, add_messages] = []
-    # message: str = ""
+    # message: str = "" # fastapi approach
 
-    history: list[HumanMessage | AIMessage] = []
+    history: list[HumanMessage | AIMessage] = []  # langgraph approach
     sql_query: str = ""
     sql_query_execution_status: Literal["success", "failure"] = "failure"
     sql_error_count: int = 0
