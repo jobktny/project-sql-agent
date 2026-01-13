@@ -3,10 +3,22 @@ This project is to demonstrate application of agentic chatbot utilising LangGrap
 
 ## Project structure
 This repository contains 3 main services which are database, backend and frontend, each service need its own environment and config.
-< project structure pics>
+.
+└── project-sql-agent/
+    ├── serivces/
+    │   ├── backend_api/
+    │   │   └── ...
+    │   ├── database/
+    │   │   └── ...
+    │   └── frontend/
+    │       └── ...
+    ├── langgraph.json
+    ├── pyproject.toml
+    └── README.md
 
 ## DATABASE
-### prerequsitory 
+### prerequsitory
+
 ### docker
 
 ## Backend 

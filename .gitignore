@@ -216,4 +216,9 @@ node_modules/
 *.pckl
 .langgraph_api
 
-.DS_Store
+.DS_Store   
+
+*.csv
+*.db
+services/database/resources/
+services/database/cleaned_resources/
