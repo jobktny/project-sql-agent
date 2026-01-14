@@ -12,7 +12,6 @@ class GraphBuilder:
 
         self.workflow = StateGraph(State)
 
-        # self.workflow.add_node("router", agent.router_agent)
         self.workflow.add_node("write_query", agent.write_query)
         self.workflow.add_node("execute_query", agent.execute_query)
         self.workflow.add_node("generate_answer", agent.generate_answer)
@@ -27,12 +26,12 @@ class GraphBuilder:
             self.chat_router,
             ["chat_agent", "execute_query", "cannot_answer"],
         )
-        # self.workflow.add_edge("write_query", "execute_query")
         self.workflow.add_conditional_edges(
             "execute_query",
             self.query_router,
             ["generate_answer", "cannot_answer", "plot_agent", "write_query"],
         )
+        # flow end here
         self.workflow.add_edge("chat_agent", END)
         self.workflow.add_edge("plot_agent", END)
         self.workflow.add_edge("generate_answer", END)

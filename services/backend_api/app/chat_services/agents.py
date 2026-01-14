@@ -245,6 +245,7 @@ class Agent:
             4. Each parameter (like xaxis, yaxis, title, etc.) should only appear once in any function call.
             5. Generate clean, syntactically correct Python code without duplicate arguments.
             6. IMPORTANT: Always include ALL necessary imports at the top of your code (e.g., `import datetime`, `from datetime import datetime`, `import pandas as pd`, etc.). Never assume any module is pre-imported.
+            7. ONLY use table_info to see the columns and how data are related to each other. DONOT import database or use any other data source, use sql_resul as the source of data.
         """
         user_prompt = """
             User message: {user_message}
