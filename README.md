@@ -1,4 +1,4 @@
-# SQL Agent project
+<img width="1224" height="330" alt="image" src="https://github.com/user-attachments/assets/671da6d4-fa21-4015-90c2-9a95a2f5b0c2" /># SQL Agent project
 This project is to demonstrate application of agentic chatbot utilising LangGraph for agent orchestrate. This chatbot allow users to query and visualise plots about their business data.
 
 ## Project structure
@@ -49,6 +49,12 @@ This repository contains 3 main services which are database, backend and fronten
 4. Install `pnpm` to manage node dependency run `npm install -g pnpm`
 5. Install depencendy `pnpm install`
 6. Run `pnpm dev` the server will be running at `http://localhost:3000`
+
+## Workflow
+<img width="1224" height="330" alt="image" src="https://github.com/user-attachments/assets/228131be-f8df-4e9b-ade2-71aa878723bc" />
+
+## ChatUI example
+<img width="1500" height="820" alt="image" src="https://github.com/user-attachments/assets/e447d582-ea12-4551-a211-726da660bd4a" />
 
 
 ## References
