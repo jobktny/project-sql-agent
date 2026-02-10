@@ -1,4 +1,3 @@
-<img width="1224" height="330" alt="image" src="https://github.com/user-attachments/assets/671da6d4-fa21-4015-90c2-9a95a2f5b0c2" /># SQL Agent project
 This project is to demonstrate application of agentic chatbot utilising LangGraph for agent orchestrate. This chatbot allow users to query and visualise plots about their business data.
 
 ## Project structure
